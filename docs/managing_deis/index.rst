@@ -11,7 +11,6 @@ Managing Deis
 
 .. toctree::
 
-    logging_in
     add_remove_host
     backing_up_data
     configure-dns
