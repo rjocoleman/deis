@@ -189,6 +189,10 @@ class FleetHTTPClient(object):
         """Stop a container"""
         raise NotImplementedError
 
+    def restart(self, name):
+        """Restart a container"""
+        raise NotImplementedError
+
     def destroy(self, name):
         """Destroy a container"""
         # call all destroy functions, ignoring any errors

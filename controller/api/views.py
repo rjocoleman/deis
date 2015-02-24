@@ -148,6 +148,18 @@ class AppViewSet(BaseDeisViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def restart(self, request, **kwargs):
+        app = self.kwargs.get('id')
+        container_type = self.kwargs.get('type')
+        container_id = self.kwargs.get('num')
+        try:
+            app.restart(request.user, container_type, container_id)
+        except (EnvironmentError, ValidationError) as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except RuntimeError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def logs(self, request, **kwargs):
         app = self.get_object()
         try:

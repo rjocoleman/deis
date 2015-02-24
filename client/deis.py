@@ -34,6 +34,7 @@ Shortcut commands, use ``deis shortcuts`` to see all::
   run           run a command in an ephemeral app container
   destroy       destroy an application
   pull          imports an image and deploys as a new release
+  restart       restart an application or container
 
 Use ``git push deis master`` to deploy to an application.
 
@@ -1435,6 +1436,7 @@ class DeisClient(object):
 
         ps:list        list application processes
         ps:scale       scale processes (e.g. web=4 worker=2)
+        ps:restart     restart app or app containers
 
         Use `deis help [command]` to learn more.
         """
@@ -1505,6 +1507,49 @@ class DeisClient(object):
             before = time.time()
             response = self._dispatch('post',
                                       "/v1/apps/{}/scale".format(app),
+                                      json.dumps(body))
+        finally:
+            progress.cancel()
+            progress.join()
+        if response.status_code == requests.codes.no_content:
+            self._logger.info('done in {}s'.format(int(time.time() - before)))
+            self.ps_list({}, app)
+        else:
+            raise ResponseError(response)
+
+    def ps_restart(self, args):
+        """
+        Restarts an application or it's processes by type.
+
+        Usage: deis ps:restart <type>.<id>... [options]
+
+        Arguments:
+          <type>
+            the process name as defined in your Procfile, such as 'web' or 'worker'.
+            Note that Dockerfile apps have a default 'cmd' process type.
+          <id>
+            the container number.
+
+        Options:
+          -a --app=<app>
+            the uniquely identifiable name for the application.
+        """
+        app = args.get('--app')
+        if not app:
+            app = self._session.app
+        body = {}
+        for type_aid in args.get('<type>.<id>'):
+            typ, aid = type_aid.split('.')
+        restarting_cmd = 'Restarting processes... but first, {}!\n'.format(
+            os.environ.get('DEIS_DRINK_OF_CHOICE', 'coffee'))
+        sys.stdout.write(restarting_cmd)
+        sys.stdout.flush()
+        try:
+            progress = TextProgress()
+            progress.start()
+            before = time.time()
+            response = self._dispatch('post',
+                                      "/v1/apps/{app}/restart/{typ}/{aid}".format(**locals()),
                                       json.dumps(body))
         finally:
             progress.cancel()
@@ -2017,6 +2062,7 @@ SHORTCUTS = OrderedDict([
     ('sharing:add', 'perms:create'),
     ('sharing:remove', 'perms:delete'),
     ('whoami', 'auth:whoami'),
+    ('restart', 'ps:restart'),
 ])
 
 

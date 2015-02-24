@@ -234,6 +234,12 @@ class App(UuidAuditedModel):
         self.save()
         return changed
 
+    def restart(self, container_type, container_number):
+        """Restart application or specified containers/container types."""
+        containers = list(self.container_set.filter(type=container_type).order_by('created'))
+        for c in containers:
+            threading.Thread(target=c.restart)
+
     def _start_containers(self, to_add):
         """Creates and starts containers via the scheduler"""
         create_threads = []
@@ -488,6 +494,16 @@ class Container(UuidAuditedModel):
             self._scheduler.stop(job_id)
         except Exception as e:
             err = '{} (stop): {}'.format(job_id, e)
+            log_event(self.app, err, logging.ERROR)
+            raise
+
+    @transition(field=state, source='*', target=UP, on_error=ERROR)
+    def restart(self):
+        job_id = self._job_id
+        try:
+            self._scheduler.restart(job_id)
+        except Exception as e:
+            err = '{} (restart): {}'.format(job_id, e)
             log_event(self.app, err, logging.ERROR)
             raise
 

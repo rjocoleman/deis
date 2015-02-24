@@ -4,6 +4,7 @@ CREATE_ERROR_RATE = 0
 DESTROY_ERROR_RATE = 0
 START_ERROR_RATE = 0
 STOP_ERROR_RATE = 0
+RESTART_ERROR_RATE = 0
 
 
 class ChaosSchedulerClient(object):
@@ -34,6 +35,14 @@ class ChaosSchedulerClient(object):
         Stop a running job
         """
         if random.random() < STOP_ERROR_RATE:
+            raise RuntimeError
+        return True
+
+    def restart(self, name):
+        """
+        Restart a running job
+        """
+        if random.random() < RESTART_ERROR_RATE:
             raise RuntimeError
         return True
 

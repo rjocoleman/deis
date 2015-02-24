@@ -41,6 +41,9 @@ urlpatterns = patterns(
     # application actions
     url(r'^apps/(?P<id>{})/scale/?'.format(settings.APP_URL_REGEX),
         views.AppViewSet.as_view({'post': 'scale'})),
+    url(r'^apps/(?P<id>{})/restart/(?P<type>[-_\w]+)/(?P<num>[-_\w]+)/?'.format(
+        settings.APP_URL_REGEX),
+        views.AppViewSet.as_view({'post': 'restart'})),
     url(r'^apps/(?P<id>{})/logs/?'.format(settings.APP_URL_REGEX),
         views.AppViewSet.as_view({'get': 'logs'})),
     url(r'^apps/(?P<id>{})/run/?'.format(settings.APP_URL_REGEX),

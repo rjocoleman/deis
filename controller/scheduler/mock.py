@@ -31,6 +31,12 @@ class MockSchedulerClient(object):
         """
         return
 
+    def restart(self, name):
+        """
+        Restart a container
+        """
+        return
+
     def destroy(self, name):
         """
         Destroy a container
